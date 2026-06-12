@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    background-color: #020617;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+@layer utilities {
+  .animate-neural-pulse {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: neural-pulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 8s ease-in-out infinite alternate;
+  }
+
+  .hover-shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hover-shine-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1) 20%,
+      rgba(255, 255, 255, 0.2) 60%,
+      transparent
+    );
+    transform: skewX(-25deg);
+    transition: none;
+  }
+
+  .hover-shine-effect:hover::after {
+    left: 150%;
+    transition: all 0.75s ease-in-out;
+  }
+}
+
+@keyframes neural-pulse {
+  0% {
+    stroke-dashoffset: 200;
+    opacity: 0.3;
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -200;
+    opacity: 0.3;
+  }
+}
+
+@keyframes glow-pulse {
+  0% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.14;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(cuid())
+  clerkUserId  String?         @unique
+  email        String          @unique
+  username     String?         @unique
+  displayName  String?
+  avatarUrl    String?
+  bio          String?
+  role         AdminRole       @default(USER)
+  passwordHash String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  favorites    MovieFavorite[]
+  wishlists    MovieWishlist[]
+  reviews      Review[]
+  auditLogs    AuditLog[]
+}
+
+enum AdminRole {
+  USER
+  MODERATOR
+  EDITOR
+  ADMIN
+}
+
+model Movie {
+  id          String          @id @default(cuid())
+  externalId  String?         @unique
+  slug        String          @unique
+  title       String
+  synopsis    String?
+  releaseYear String
+  posterUrl   String?
+  backdropUrl String?
+  trailerUrl  String?
+  seasonTrailers SeasonTrailer[]
+  screenshots   String[]        @default([])
+  director      String?
+  tmdbRating    Float?
+  tmdbRatingCount String?
+  imdbRating    String?
+  imdbRatingCount String?
+  releaseQuality String?        @default("1080p WEB-DL")
+  releaseFormat  String?        @default("Mkv")
+  // Series-specific fields
+  seasons        String?        // e.g. "1, 2, 3, 4"
+  episodes       String?        // e.g. "8 & 8 & 8 & 8"
+  language       String?        // e.g. "Dual Audio (Hindi-English)"
+  subtitles      String?        // e.g. "Yes (Hindi+English)"
+  episodeSize    String?        // e.g. "200MB & 450MB (Each Episode)"
+  status        MovieStatus     @default(DRAFT)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+  isFeatured  Boolean         @default(false)
+  contentType String          @default("MOVIE") // "MOVIE", "SERIES", "WEB_SERIES", "ANIME"
+  views       Int             @default(0)
+  clicks      Int             @default(0)
+  genres      MovieGenre[]
+  castMembers CastMember[]
+  favorites   MovieFavorite[]
+  wishlists   MovieWishlist[]
+  reviews     Review[]
+  watchLinks  WatchLink[]
+  releasePackages ReleasePackage[]
+  dailyMetrics DailyMetric[]
+
+  @@index([slug])
+  @@index([releaseYear])
+  @@index([status])
+}
+
+enum MovieStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+
+model Genre {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  movies    MovieGenre[]
+}
+
+model Actor {
+  id              String       @id @default(cuid())
+  slug            String?      @unique
+  tmdbId          String?      @unique
+  name            String
+  bio             String?
+  knownFor        String?
+  birthDate       String?
+  birthPlace      String?
+  profileUrl      String?
+  sourceConfidence Float        @default(0.5)
+  isIndexable     Boolean       @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  castMembers     CastMember[]
+
+  @@index([name])
+  @@index([isIndexable, updatedAt])
+}
+
+model MovieGenre {
+  movieId    String
+  genreId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre      Genre    @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, genreId])
+}
+
+model CastMember {
+  movieId    String
+  actorId    String
+  character  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  actor      Actor    @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, actorId])
+}
+
+model MovieFavorite {
+  userId     String
+  movieId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@id([userId, movieId])
+}
+
+model MovieWishlist {
+  userId    String
+  movieId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@id([userId, movieId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  movieId   String
+  rating    Int
+  text      String?
+  moderated Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+  @@index([movieId, rating])
+}
+
+model GlobalSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  actorUserId     String?
+  actorClerkUserId String?
+  action          String
+  entityType      String
+  entityId        String?
+  before          Json?
+  after           Json?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  actor           User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+}
+
+enum WatchLinkType {
+  STREAM
+  RENT
+  BUY
+  FREE
+  DOWNLOAD
+}
+
+enum ReleaseDestinationType {
+  EPISODE_LINKS
+  BATCH_ZIP
+  MIRROR
+  STREAM
+  OTHER
+}
+
+model WatchLink {
+  id          String        @id @default(cuid())
+  movieId     String
+  platform    String        // e.g. "Netflix", "Prime Video", "Apple TV", "Telegram", "YouTube"
+  url         String        // Direct link to the external title
+  type        WatchLinkType @default(STREAM)
+  quality     String?       // e.g. "4K UHD", "1080p WEB-DL"
+  language    String?       // e.g. "Hindi-English", "English", "Multi"
+  price       String?       // e.g. "Rent $3.99", "Free"
+  seasonLabel String?       // e.g. "Season 1", "All Seasons Batch"
+  linkLabel   String?       // e.g. "Episode Links", "Batch/Zip File"
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  movie       Movie         @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@index([movieId])
+}
+
+model ReleasePackage {
+  id            String               @id @default(cuid())
+  movieId       String
+  title         String
+  seasonLabel   String?
+  audioLabel    String?
+  qualityLabel  String?
+  subtitleLabel String?
+  sizeLabel     String?
+  notes         String?
+  sortOrder     Int                  @default(0)
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  movie         Movie                @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  destinations  ReleaseDestination[]
+
+  @@index([movieId, sortOrder])
+  @@index([movieId, isActive])
+}
+
+model ReleaseDestination {
+  id           String                 @id @default(cuid())
+  packageId    String
+  label        String
+  url          String
+  type         ReleaseDestinationType @default(OTHER)
+  sortOrder    Int                    @default(0)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  package      ReleasePackage         @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId, sortOrder])
+  @@index([type])
+}
+
+model SeasonTrailer {
+  id          String   @id @default(cuid())
+  movieId     String
+  seasonLabel String
+  title       String?
+  url         String
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@index([movieId, sortOrder])
+  @@index([movieId, isActive])
+}
+
+model DailyMetric {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  movieId   String
+  views     Int      @default(0)
+  clicks    Int      @default(0)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([date, movieId])
+  @@index([movieId])
+}
+
+model AdSlotMetric {
+  id             String   @id @default(cuid())
+  date           DateTime @db.Date
+  slotKey        String
+  pageGroup      String
+  providerType   String
+  impressions    Int      @default(0)
+  clicks         Int      @default(0)
+  fallbacks      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([date, slotKey])
+  @@index([slotKey])
+  @@index([pageGroup])
+  @@index([providerType])
+}
