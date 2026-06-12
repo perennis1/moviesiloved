@@ -55,6 +55,7 @@ For the release sequence and branch protection guidance, see [release-and-branch
 ## Recommended Render Settings
 
 - Use the Docker image built by GitHub Actions or let Render build from `Dockerfile`.
+- Make sure the service is connected to the `main` branch.
 - Set the health check path to `/api/health`.
 - Use persistent bucket storage for all uploaded media.
 - Keep `APP_URL` pointed at the public Render domain.

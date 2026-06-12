@@ -8,6 +8,8 @@ import { absolutePublicUrl } from "@/lib/public-url";
 import { isSponsorCampaignLive } from "@/lib/site-settings";
 import { getSiteSettings } from "@/server/lib/site-settings";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettings = await getSiteSettings();
 

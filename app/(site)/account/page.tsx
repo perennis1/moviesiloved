@@ -8,6 +8,8 @@ import { isClerkConfigured } from "@/lib/clerk-config";
 import { ensureLocalUserForClerkId } from "@/server/lib/auth";
 import { prisma } from "@/server/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Account"
 };
