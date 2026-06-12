@@ -1,4 +1,4 @@
-import "./sentry.server.config";
+import "../sentry.server.config";
 import express from "express";
 import next from "next";
 import { clerkMiddleware } from "@clerk/express";
