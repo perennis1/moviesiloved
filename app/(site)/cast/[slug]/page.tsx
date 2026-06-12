@@ -7,6 +7,8 @@ import { absolutePublicUrl, compactText, truncateText } from "@/lib/public-url";
 import { buildCastSummary, shouldIndexCastPage } from "@/lib/cast";
 import { prisma } from "@/server/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 type CastPageMovie = {
   id: string;
   slug: string;

@@ -3,7 +3,7 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required."),
+  DATABASE_URL: z.string().default(""),
   PORT: z.string().default("3000"),
   APP_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().default(""),

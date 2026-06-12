@@ -20,6 +20,8 @@ import { SuggestedSearchesRow } from "@/components/suggested-searches-row";
 import { getSiteSettings } from "@/server/lib/site-settings";
 import { getMonetizationConfig, getMonetizationSlot } from "@/server/lib/monetization";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 12;
 type HomeHref = Parameters<typeof Link>[0]["href"];
 

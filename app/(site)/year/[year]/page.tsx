@@ -11,6 +11,8 @@ import { ArchiveSearchPanel } from "@/components/archive-search-panel";
 import { SuggestedSearchesRow } from "@/components/suggested-searches-row";
 import { getMonetizationConfig, getMonetizationSlot } from "@/server/lib/monetization";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 12;
 
 export async function generateMetadata({

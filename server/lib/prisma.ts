@@ -10,7 +10,11 @@ export const prisma =
   new PrismaClient({
     datasources: {
       db: {
-        url: env.DATABASE_URL
+        url:
+          env.DATABASE_URL ||
+          (process.env.NEXT_PHASE === "phase-production-build"
+            ? "postgresql://placeholder:placeholder@localhost:5432/placeholder"
+            : "")
       }
     },
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"]

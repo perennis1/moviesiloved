@@ -9,6 +9,8 @@ import { buildMediaReport } from "@/lib/media-report";
 import { prisma } from "@/server/lib/prisma";
 import { resolveUserByMinimumRole } from "@/server/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   if (!isClerkConfigured()) {
     return (

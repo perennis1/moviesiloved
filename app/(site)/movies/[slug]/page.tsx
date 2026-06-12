@@ -12,6 +12,8 @@ import { ViewTracker } from "@/components/view-tracker";
 import { AdUnit } from "@/components/ad-unit";
 import { FacetRail } from "@/components/facet-rail";
 
+export const dynamic = "force-dynamic";
+
 const SIDEBAR_CATEGORIES = [
   "Action", "Youtube Premium", "Year", "Western Drama Series", "Western", 
   "Web Series", "War Series", "War", "Vietnamese", "UrduFlix", "Uncategorized", 
