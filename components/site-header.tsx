@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -49,8 +49,7 @@ export function SiteHeader({
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const { user } = useClerk();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const currentQuery = searchParams.get("q") ?? "";
 
@@ -195,66 +194,7 @@ export function SiteHeader({
           </div>
 
           <div className="flex items-center gap-3">
-            {clerkReady ? (
-              <>
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <button className="rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
-                      Sign in
-                    </button>
-                  </SignInButton>
-                </SignedOut>
-                <SignedIn>
-                  <Link href={adminHref} className="inline-flex rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
-                    Admin
-                  </Link>
-                  <div ref={profileMenuRef} className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsProfileMenuOpen((current) => !current)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-[#161616]/70 px-2 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white"
-                    >
-                      <span className="flex h-7 w-7 overflow-hidden rounded-full border border-white/10 bg-gradient-to-br from-emerald-500/20 to-sky-500/20">
-                        {user?.imageUrl ? <img src={user.imageUrl} alt={user?.fullName || "Account"} className="h-full w-full object-cover" /> : null}
-                      </span>
-                      <span className="hidden sm:inline">Profile</span>
-                      <svg className={`h-3 w-3 transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {isProfileMenuOpen ? (
-                      <>
-                        <button
-                          type="button"
-                          aria-label="Close profile menu"
-                          className="fixed inset-0 z-40 cursor-default"
-                          onClick={() => setIsProfileMenuOpen(false)}
-                        />
-                        <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/5 bg-[#161616]/95 p-1.5 shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-                          <div className="px-3 py-2">
-                            <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-zinc-500">Signed in as</p>
-                            <p className="mt-1 truncate text-sm font-semibold text-white">{user?.fullName || user?.primaryEmailAddress?.emailAddress || "Account"}</p>
-                          </div>
-                          <div className="my-1 h-px bg-white/5" />
-                          <Link
-                            href="/account"
-                            onClick={() => setIsProfileMenuOpen(false)}
-                            className="flex items-center rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
-                          >
-                            Account
-                          </Link>
-                        </div>
-                      </>
-                    ) : null}
-                  </div>
-                </SignedIn>
-              </>
-            ) : (
-              <span className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-2.5 py-1.5 text-[0.58rem] font-medium text-amber-400">
-                Auth off
-              </span>
-            )}
+            {clerkReady ? <ClerkActions profileMenuRef={profileMenuRef} isProfileMenuOpen={isProfileMenuOpen} setIsProfileMenuOpen={setIsProfileMenuOpen} /> : <AuthOffBadge />}
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -372,4 +312,77 @@ export function SiteHeader({
       </div>
     </header>
   );
+}
+
+function ClerkActions({
+  profileMenuRef,
+  isProfileMenuOpen,
+  setIsProfileMenuOpen
+}: {
+  profileMenuRef: RefObject<HTMLDivElement>;
+  isProfileMenuOpen: boolean;
+  setIsProfileMenuOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { user } = useClerk();
+
+  return (
+    <>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <button className="rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
+            Sign in
+          </button>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <Link href={adminHref} className="inline-flex rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
+          Admin
+        </Link>
+        <div ref={profileMenuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setIsProfileMenuOpen((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-[#161616]/70 px-2 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white"
+          >
+            <span className="flex h-7 w-7 overflow-hidden rounded-full border border-white/10 bg-gradient-to-br from-emerald-500/20 to-sky-500/20">
+              {user?.imageUrl ? <img src={user.imageUrl} alt={user?.fullName || "Account"} className="h-full w-full object-cover" /> : null}
+            </span>
+            <span className="hidden sm:inline">Profile</span>
+            <svg className={`h-3 w-3 transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {isProfileMenuOpen ? (
+            <>
+              <button
+                type="button"
+                aria-label="Close profile menu"
+                className="fixed inset-0 z-40 cursor-default"
+                onClick={() => setIsProfileMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/5 bg-[#161616]/95 p-1.5 shadow-[0_16px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+                <div className="px-3 py-2">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-zinc-500">Signed in as</p>
+                  <p className="mt-1 truncate text-sm font-semibold text-white">{user?.fullName || user?.primaryEmailAddress?.emailAddress || "Account"}</p>
+                </div>
+                <div className="my-1 h-px bg-white/5" />
+                <Link
+                  href="/account"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                  className="flex items-center rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  Account
+                </Link>
+              </div>
+            </>
+          ) : null}
+        </div>
+      </SignedIn>
+    </>
+  );
+}
+
+function AuthOffBadge() {
+  return <span className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-2.5 py-1.5 text-[0.58rem] font-medium text-amber-400">Auth off</span>;
 }

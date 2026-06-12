@@ -2,7 +2,7 @@ import "../sentry.server.config";
 import express from "express";
 import next from "next";
 import { clerkMiddleware } from "@clerk/express";
-import * as Sentry from "@sentry/nextjs";
+import { captureException } from "@sentry/node";
 
 import adminRoutes from "./routes/admin";
 import authRoutes from "./routes/auth";
@@ -60,18 +60,18 @@ async function bootstrap() {
 
   server.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
     if (error instanceof AppError) {
-      Sentry.captureException(error);
+      captureException(error);
       response.status(error.statusCode).json({ error: error.message });
       return;
     }
 
     if (error && typeof error === "object" && "issues" in error) {
-      Sentry.captureException(new Error("Invalid request payload."));
+      captureException(new Error("Invalid request payload."));
       response.status(400).json({ error: "Invalid request payload.", details: error });
       return;
     }
 
-    Sentry.captureException(error instanceof Error ? error : new Error("Unknown server error"));
+    captureException(error instanceof Error ? error : new Error("Unknown server error"));
     console.error(error);
     response.status(500).json({ error: "Internal server error." });
   });
