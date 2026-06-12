@@ -1,6 +1,7 @@
 # Production Checklist
 
 This repo is intended to ship as a single Render-hosted monolith, with GitHub Actions building the Docker image and pushing it to GHCR.
+For the release sequence and branch protection guidance, see [release-and-branch-protection.md](./release-and-branch-protection.md).
 
 ## Hosting Layout
 
@@ -57,6 +58,12 @@ This repo is intended to ship as a single Render-hosted monolith, with GitHub Ac
 - Set the health check path to `/api/health`.
 - Use persistent bucket storage for all uploaded media.
 - Keep `APP_URL` pointed at the public Render domain.
+
+## Recommended GitHub Settings
+
+- Protect `main` with required PR reviews and required CI checks.
+- Use the `Release` workflow only for version tags like `v0.1.1`.
+- Keep tag releases separate from merge deploys so Render auto-deploys stay simple.
 
 ## Media Rules
 
