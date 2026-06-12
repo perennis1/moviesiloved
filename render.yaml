@@ -3,6 +3,7 @@ services:
     name: moviesiloved-app
     env: docker
     plan: starter
+    branch: main
     autoDeploy: true
     healthCheckPath: /api/health
     dockerfilePath: ./Dockerfile
