@@ -89,6 +89,16 @@ type MovieDetail = {
   }>;
 };
 
+const EMPTY_HOMEPAGE_FACET_STATS: HomepageFacetStats = {
+  genres: [],
+  languages: [],
+  years: [],
+  types: [],
+  audio: [],
+  quality: [],
+  popularFilters: []
+};
+
 export async function getGlobalSettings(key: string): Promise<string | null> {
   const response = await fetch(`${getBaseUrl()}/api/settings?key=${key}`, { cache: "no-store" });
   if (!response.ok) return null;
@@ -138,7 +148,7 @@ export async function getMovies(
 
   const data = await response.json() as { movies: Movie[]; total?: number };
 
-  // total may not exist yet on old API — fall back to movies.length
+  // total may not exist yet on old API â€” fall back to movies.length
   return {
     movies: data.movies,
     total: data.total ?? data.movies.length
@@ -146,16 +156,20 @@ export async function getMovies(
 }
 
 export async function getMovieFacetStats() {
-  const response = await fetch(`${getBaseUrl()}/api/movies/facets`, { cache: "no-store" });
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/movies/facets`, { cache: "no-store" });
 
-  if (!response.ok) {
-    throw new Error("Failed to load homepage filters.");
+    if (!response.ok) {
+      return EMPTY_HOMEPAGE_FACET_STATS;
+    }
+
+    return response.json() as Promise<HomepageFacetStats>;
+  } catch {
+    return EMPTY_HOMEPAGE_FACET_STATS;
   }
-
-  return response.json() as Promise<HomepageFacetStats>;
 }
 
-/** Fetch all movies without pagination — used for carousel etc. */
+/** Fetch all movies without pagination â€” used for carousel etc. */
 export async function getAllMovies() {
   const response = await fetch(`${getBaseUrl()}/api/movies`, { cache: "no-store" });
   if (!response.ok) throw new Error("Failed to load movies.");

@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { isPrismaMissingTableError } from "./prisma-errors";
 import {
   createDefaultMonetizationConfig,
   getSlotFromConfig,
@@ -23,22 +24,31 @@ function buildLegacySnippets(rows: Array<{ key: string; value: string }>) {
 }
 
 export async function getMonetizationConfig(): Promise<MonetizationConfig> {
-  const rows = await prisma.globalSettings.findMany({
-    where: {
-      key: {
-        in: [MONETIZATION_CONFIG_KEY, ...LEGACY_MONETIZATION_SNIPPET_KEYS]
+  try {
+    const rows = await prisma.globalSettings.findMany({
+      where: {
+        key: {
+          in: [MONETIZATION_CONFIG_KEY, ...LEGACY_MONETIZATION_SNIPPET_KEYS]
+        }
       }
+    });
+
+    const configRow = rows.find((row) => row.key === MONETIZATION_CONFIG_KEY);
+    const legacySnippets = buildLegacySnippets(rows);
+
+    if (!configRow?.value?.trim()) {
+      return createDefaultMonetizationConfig(legacySnippets);
     }
-  });
 
-  const configRow = rows.find((row) => row.key === MONETIZATION_CONFIG_KEY);
-  const legacySnippets = buildLegacySnippets(rows);
+    return normalizeMonetizationConfig(configRow.value, legacySnippets);
+  } catch (error) {
+    if (isPrismaMissingTableError(error)) {
+      console.warn("GlobalSettings table is missing. Falling back to default monetization config until migrations are applied.");
+      return createDefaultMonetizationConfig();
+    }
 
-  if (!configRow?.value?.trim()) {
-    return createDefaultMonetizationConfig(legacySnippets);
+    throw error;
   }
-
-  return normalizeMonetizationConfig(configRow.value, legacySnippets);
 }
 
 export function getMonetizationSlot(config: MonetizationConfig, slotKey: MonetizationSlotKey) {
