@@ -136,6 +136,7 @@ export default async function MoviePage({ params }: { params: { slug: string } }
     const trailerEmbedUrl = getTrailerEmbedUrl(movie.trailerUrl);
     const pageUrl = absolutePublicUrl(`/movies/${movie.slug}`);
     const posterUrl = movie.backdropUrl || movie.posterUrl || null;
+    const posterThumbUrl = movie.posterUrl || movie.backdropUrl || null;
     const primaryGenre = movie.genres[0]?.genre.name ?? null;
     const [genreMatches, yearMatches] = await Promise.all([
       primaryGenre ? getMovies(1, 8, { genre: primaryGenre }) : Promise.resolve({ movies: [], total: 0 }),
@@ -294,6 +295,19 @@ export default async function MoviePage({ params }: { params: { slug: string } }
                         <p className="text-sm leading-relaxed text-zinc-200 drop-shadow-md">
                           {movie.synopsis || "No synopsis available for this title."}
                         </p>
+
+                        {posterThumbUrl ? (
+                          <div className="mt-3 flex justify-start">
+                            <figure className="max-w-[180px] overflow-hidden rounded-[1rem] border border-[#222222] bg-black shadow-lg">
+                              <img
+                                src={posterThumbUrl}
+                                alt={`${movie.title} poster`}
+                                className="block h-auto w-full object-cover"
+                                loading="lazy"
+                              />
+                            </figure>
+                          </div>
+                        ) : null}
                         
                         <div className="mt-2 space-y-1 text-xs text-zinc-300">
                           <p>
