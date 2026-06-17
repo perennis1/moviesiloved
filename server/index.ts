@@ -46,12 +46,26 @@ async function bootstrap() {
   });
 
   server.get("/api/ready", async (_request, response) => {
+    const startedAt = Date.now();
+
     try {
       await prisma.$queryRaw<unknown>(Prisma.sql`SELECT 1`);
-      response.json({ ok: true, database: "ok" });
+      response.json({
+        ok: true,
+        database: "ok",
+        environment: env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "unknown",
+        responseTimeMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       captureException(error instanceof Error ? error : new Error("Readiness check failed"));
-      response.status(503).json({ ok: false, database: "down" });
+      response.status(503).json({
+        ok: false,
+        database: "down",
+        environment: env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "unknown",
+        responseTimeMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
