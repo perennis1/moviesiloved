@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "tsx watch --ignore .next server/index.ts",
     "build": "next build",
-    "postinstall": "prisma generate",
     "start": "NODE_ENV=production tsx server/index.ts",
     "lint": "next lint",
     "db:generate": "prisma generate",
