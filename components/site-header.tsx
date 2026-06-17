@@ -37,16 +37,13 @@ function buildCountMap(items: HomepageFacetStats["genres"]) {
 
 export function SiteHeader({
   logoUrl,
-  facetStats
+  facetStats,
+  clerkConfigured
 }: {
   logoUrl?: string | null;
   facetStats: HomepageFacetStats;
+  clerkConfigured: boolean;
 }) {
-  const clerkReady =
-    typeof process !== "undefined" &&
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith("pk_") &&
-    !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("replace_me");
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -194,7 +191,7 @@ export function SiteHeader({
           </div>
 
           <div className="flex items-center gap-3">
-            {clerkReady ? <ClerkActions profileMenuRef={profileMenuRef} isProfileMenuOpen={isProfileMenuOpen} setIsProfileMenuOpen={setIsProfileMenuOpen} /> : <AuthOffBadge />}
+            {clerkConfigured ? <ClerkActions profileMenuRef={profileMenuRef} isProfileMenuOpen={isProfileMenuOpen} setIsProfileMenuOpen={setIsProfileMenuOpen} /> : <AuthOffBadge />}
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
