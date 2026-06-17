@@ -3,6 +3,7 @@ import express from "express";
 import next from "next";
 import { clerkMiddleware } from "@clerk/express";
 import { captureException } from "@sentry/node";
+import { Prisma } from "@prisma/client";
 
 import adminRoutes from "./routes/admin";
 import authRoutes from "./routes/auth";
@@ -13,6 +14,7 @@ import tmdbRoutes from "./routes/tmdb";
 import scrapeRoutes from "./routes/scrape";
 import { isServerClerkConfigured } from "./lib/auth";
 import { AppError } from "./lib/errors";
+import { prisma } from "./lib/prisma";
 import { ensureUploadsDir, isUsingDefaultPublicUploadsDir, uploadsDir, uploadsPublicUrl } from "./lib/uploads";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -41,6 +43,30 @@ async function bootstrap() {
 
   server.get("/api/health", (_request, response) => {
     response.json({ ok: true });
+  });
+
+  server.get("/api/ready", async (_request, response) => {
+    const startedAt = Date.now();
+
+    try {
+      await prisma.$queryRaw<unknown>(Prisma.sql`SELECT 1`);
+      response.json({
+        ok: true,
+        database: "ok",
+        environment: env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "unknown",
+        responseTimeMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      captureException(error instanceof Error ? error : new Error("Readiness check failed"));
+      response.status(503).json({
+        ok: false,
+        database: "down",
+        environment: env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "unknown",
+        responseTimeMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString()
+      });
+    }
   });
 
   server.use("/api/auth", authRoutes);

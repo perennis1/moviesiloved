@@ -48,16 +48,19 @@ export const SITE_SETTINGS_KEYS = {
 } as const;
 
 export const DEFAULT_FOOTER_LINKS: FooterLink[] = [
-  { label: "Browse", href: "/#library" },
-  { label: "Categories", href: "/genre/Action" },
-  { label: "Search", href: "/?q=" },
-  { label: "Admin", href: "/admin" }
+  { label: "How It Works", href: "/how-it-works" },
+  { label: "Report an Issue", href: "/report-broken-links" },
+  { label: "Request a Title", href: "/request-us" },
+  { label: "DMCA", href: "/dmca" },
+  { label: "Contact Us", href: "/contact-us" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Site Disclaimer", href: "/site-disclaimer" }
 ];
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   siteTitle: "Movies I Loved",
   siteDescription: "A fast, dark movie catalog built for discovery, metadata, and a clean public browsing experience.",
-  footerBlurb: "A dark, fast, category-driven movie home built for posters, discovery, and later deeper metadata.",
+  footerBlurb: "A cinematic catalog built for discovery, clean metadata, and editorial control.",
   footerLinks: DEFAULT_FOOTER_LINKS,
   maintenanceMode: false,
   maintenanceMessage: "We’re making a few sitewide improvements. Browsing remains available.",
