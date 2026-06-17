@@ -4,19 +4,6 @@ import { prisma } from "@/server/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-type MovieListItem = {
-  slug: string;
-  releaseYear: string;
-  genreNames: string[];
-};
-
-type MovieDetailItem = {
-  slug: string;
-  language: string | null;
-  watchLinks: Array<{ language: string | null }>;
-  releasePackages: Array<{ audioLabel: string | null }>;
-};
-
 type CastSitemapItem = {
   slug: string;
   isIndexable: boolean;
@@ -52,59 +39,47 @@ function urlEntry(
 
 export async function GET() {
   try {
-    const listResponse = await fetch(`${absolutePublicUrl("/api/movies")}?take=1000`, {
-      cache: "no-store"
-    });
-
-    if (!listResponse.ok) {
-      return new Response(
-        `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlEntry(
-          absolutePublicUrl("/"),
-          { changeFrequency: "daily", priority: 1 }
-        )}</urlset>`,
-        {
-          headers: {
-            "Content-Type": "application/xml; charset=utf-8"
+    const movies = await prisma.movie.findMany({
+      where: {
+        deletedAt: null,
+        status: "PUBLISHED"
+      },
+      select: {
+        slug: true,
+        releaseYear: true,
+        language: true,
+        genres: {
+          select: {
+            genre: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        watchLinks: {
+          select: {
+            language: true
+          }
+        },
+        releasePackages: {
+          select: {
+            audioLabel: true
           }
         }
-      );
-    }
-
-    const listData = (await listResponse.json()) as { movies: MovieListItem[] };
-    const detailData = await Promise.all(
-      listData.movies.map(async (movie) => {
-        const response = await fetch(absolutePublicUrl(`/api/movies/${movie.slug}`), {
-          cache: "no-store"
-        });
-
-        if (!response.ok) {
-          return null;
-        }
-
-        const payload = (await response.json()) as { movie: MovieDetailItem };
-        return {
-          slug: payload.movie.slug,
-          language: payload.movie.language,
-          watchLinks: payload.movie.watchLinks,
-          releasePackages: payload.movie.releasePackages,
-          releaseYear: movie.releaseYear,
-          genreNames: movie.genreNames
-        };
-      })
-    );
+      }
+    });
 
     const genreNames = new Set<string>();
     const languageNames = new Set<string>();
     const years = new Set<string>();
 
-    for (const movie of detailData) {
-      if (!movie) {
-        continue;
-      }
+    for (const movie of movies) {
+      const genreValues = movie.genres.map((item) => item.genre.name);
 
       years.add(movie.releaseYear);
 
-      for (const genre of movie.genreNames) {
+      for (const genre of genreValues) {
         if (genre.trim()) {
           genreNames.add(genre.trim());
         }
@@ -155,7 +130,7 @@ export async function GET() {
 
     const urls = [
       urlEntry(absolutePublicUrl("/"), { changeFrequency: "daily", priority: 1 }),
-      ...listData.movies.map((movie) => urlEntry(absolutePublicUrl(`/movies/${movie.slug}`), { changeFrequency: "weekly", priority: 0.9 })),
+      ...movies.map((movie) => urlEntry(absolutePublicUrl(`/movies/${movie.slug}`), { changeFrequency: "weekly", priority: 0.9 })),
       ...Array.from(genreNames)
         .sort((left, right) => left.localeCompare(right))
         .map((genre) => urlEntry(absolutePublicUrl(`/genre/${encodeURIComponent(genre)}`), { changeFrequency: "weekly", priority: 0.7 })),

@@ -4,9 +4,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig = {
   productionBrowserSourceMaps: true,
   experimental: {
-    typedRoutes: true,
-    workerThreads: true,
-    cpus: 1
+    typedRoutes: true
   },
   images: {
     remotePatterns: [
