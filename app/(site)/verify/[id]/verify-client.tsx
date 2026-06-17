@@ -90,7 +90,7 @@ export function VerifyClient({
             <AdUnit
               htmlScript={topBannerScript}
               className="w-full"
-              title="Verify top banner"
+              title="Top banner"
               slotKey="verify_top"
               pageGroup="verify"
               providerType="network"
@@ -98,7 +98,7 @@ export function VerifyClient({
           </div>
         ) : (
           <>
-            <span className="z-10 group-hover:text-emerald-500 transition-colors">Top Banner Ad Space (Responsive)</span>
+            <span className="z-10 group-hover:text-emerald-500 transition-colors">Top banner space (responsive)</span>
             <div className="absolute inset-0 bg-gradient-to-tr from-[#111] to-[#222] opacity-50"></div>
           </>
         )}
@@ -109,35 +109,35 @@ export function VerifyClient({
         
         {step === 1 ? (
           <div className="flex flex-col items-center justify-center space-y-6">
-            <h2 className="text-2xl font-black text-white">Please watch this to support us</h2>
+            <h2 className="text-2xl font-black text-white">Please wait while we prepare the destination</h2>
             <p className="text-sm text-zinc-400 max-w-md mx-auto">
-              This helps keep our fast servers free. You can skip the ad when the timer completes.
+              This helps keep the catalog workflow moving smoothly. You can continue when the timer completes.
             </p>
             <div className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg min-h-[150px] flex items-center justify-center overflow-hidden">
               {videoAdScript ? (
                 <AdUnit
                   htmlScript={videoAdScript}
                   className="min-h-[150px]"
-                  title="Sponsored video ad"
+                  title="Sponsored video"
                   slotKey="video_ad"
                   pageGroup="verify"
                   providerType="network"
                 />
               ) : (
-                <span className="text-zinc-600 font-bold uppercase tracking-widest text-xs">Video Ad Placeholder</span>
+                <span className="text-zinc-600 font-bold uppercase tracking-widest text-xs">Video space</span>
               )}
             </div>
             {!canProceed ? (
               <div className="flex items-center justify-center gap-3 bg-[#1a1a1a] px-4 py-2 rounded-full border border-[#333]">
                 <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-red-500 animate-spin"></div>
-                <span className="text-sm font-bold text-red-500 uppercase tracking-widest">Skip in {secondsLeft}s</span>
+                <span className="text-sm font-bold text-red-500 uppercase tracking-widest">Continue in {secondsLeft}s</span>
               </div>
             ) : (
               <button 
                 onClick={handleAction}
                 className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(239,68,68,0.4)]"
               >
-                Skip Video Ad
+                Continue
               </button>
             )}
           </div>
@@ -152,10 +152,10 @@ export function VerifyClient({
             </div>
 
             <h2 className="text-2xl font-black text-white mb-2">
-              {step === 2 ? "Verifying Request..." : "Preparing Destination Route..."}
+              {step === 2 ? "Preparing Listing..." : "Opening Destination..."}
             </h2>
             <p className="text-sm text-zinc-400 mb-8 max-w-md mx-auto">
-              Please wait while we connect to a secure high-speed server. Do not refresh or click the back button.
+              Please wait while we hand off to the selected destination. Do not refresh or click the back button.
             </p>
 
             {!canProceed ? (
@@ -195,7 +195,7 @@ export function VerifyClient({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                       </svg>
                     )}
-                    {clicked ? "Redirecting..." : step === 2 ? "Continue Verification" : "Open Destination"}
+                    {clicked ? "Opening..." : step === 2 ? "Continue" : "Open Destination"}
                   </span>
                 </button>
                 <p className={`mt-4 text-xs font-semibold uppercase tracking-widest ${
@@ -216,7 +216,7 @@ export function VerifyClient({
             <AdUnit
               htmlScript={bottomBannerScript}
               className="w-full"
-              title="Verify bottom banner"
+              title="Bottom banner"
               slotKey="verify_bottom"
               pageGroup="verify"
               providerType="network"
@@ -224,7 +224,7 @@ export function VerifyClient({
           </div>
         ) : (
           <>
-            <span className="z-10 group-hover:text-emerald-500 transition-colors">Rectangle Ad Space (300x250)</span>
+            <span className="z-10 group-hover:text-emerald-500 transition-colors">Rectangle space (300x250)</span>
             <div className="absolute inset-0 bg-gradient-to-bl from-[#111] to-[#222] opacity-50"></div>
           </>
         )}

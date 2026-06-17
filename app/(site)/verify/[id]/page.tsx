@@ -50,18 +50,16 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
   const verifyBottomSlot = getMonetizationSlot(monetizationConfig, "verify_bottom");
   const videoAdSlot = getMonetizationSlot(monetizationConfig, "video_ad");
 
-  // We are going to pass the URL to the client. 
-  // For a basic ad-wall, this is sufficient.
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* Header */}
       <header className="border-b border-[#222] bg-[#111] py-4">
         <div className="mx-auto max-w-5xl px-4 text-center">
           <h1 className="text-xl font-black text-sky-400 tracking-wider uppercase">
-            Fast Server Verification
+            Destination Preview
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Verifying your request for: {movie.title}
+            Preparing the selected title: {movie.title}
           </p>
         </div>
       </header>
@@ -84,7 +82,7 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
 
       {/* Footer */}
       <footer className="border-t border-[#222] bg-[#111] py-6 mt-12 text-center text-xs text-zinc-600">
-        <p>Please do not close this page while verifying.</p>
+        <p>Please do not close this page while we prepare the destination.</p>
         <p className="mt-1">By proceeding, you agree to the Terms of Service.</p>
       </footer>
     </div>
