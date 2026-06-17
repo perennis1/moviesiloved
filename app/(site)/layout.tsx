@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -48,6 +49,13 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0a0a0a]">
+      <Script
+        id="adsbygoogle-loader"
+        async
+        strategy="beforeInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6557755951129003"
+        crossOrigin="anonymous"
+      />
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,_rgba(16,185,129,0.06),_transparent)]" />
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[20rem] bg-[radial-gradient(ellipse_60%_30%_at_80%_0%,_rgba(238,63,91,0.04),_transparent)]" />
 
