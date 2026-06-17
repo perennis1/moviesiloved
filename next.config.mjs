@@ -2,7 +2,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
   productionBrowserSourceMaps: true,
   experimental: {
     typedRoutes: true
