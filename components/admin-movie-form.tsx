@@ -683,11 +683,16 @@ export function AdminMovieForm({
         const nextTitle = data.cleanedTitle || data.rawTitle || current.title;
         const shouldFillTitle = !current.title.trim() || current.title.trim() === "Untitled";
         const shouldFillReleaseYear = !current.releaseYear.trim() && data.releaseYear;
+        const nextPosterUrl = data.ogImage || current.posterUrl;
+        const nextSynopsis = data.ogDesc || current.synopsis;
 
         return {
           ...current,
           title: shouldFillTitle && nextTitle ? nextTitle : current.title,
           releaseYear: shouldFillReleaseYear ? String(data.releaseYear) : current.releaseYear,
+          posterUrl: !current.posterUrl.trim() && nextPosterUrl ? nextPosterUrl : current.posterUrl,
+          backdropUrl: !current.backdropUrl.trim() && nextPosterUrl ? nextPosterUrl : current.backdropUrl,
+          synopsis: !current.synopsis.trim() && nextSynopsis ? nextSynopsis : current.synopsis,
           contentType: !movieId && current.contentType === "MOVIE" && importedLooksLikeSeries ? "SERIES" : current.contentType,
           releasePackages: hasImportedPackages ? nextPackages : current.releasePackages
         };
@@ -1422,7 +1427,8 @@ export function AdminMovieForm({
                             type="number"
                             min="0"
                             max="1"
-                            step="0.1"
+                            step="0.01"
+                            inputMode="decimal"
                             value={actor.sourceConfidence}
                             onChange={(e) => {
                               const newCast = [...form.cast];
