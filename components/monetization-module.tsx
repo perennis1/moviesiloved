@@ -136,6 +136,46 @@ export function MonetizationInventoryModule({ report }: { report: MonetizationRe
 
   return (
     <div className="space-y-6">
+      <section className="rounded-[1.5rem] border border-[#222222] bg-[#111111] p-4 sm:p-5">
+        <div className="flex flex-col gap-3 border-b border-white/6 pb-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[0.72rem] uppercase tracking-[0.28em] text-emerald-300">Provider guide</p>
+            <h4 className="mt-2 text-xl font-semibold text-white">Where the ad scripts come from</h4>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
+              Use one provider per slot. The script you paste into a slot should come from that network's dashboard after your site is approved.
+              For this stack, the usual options are Google AdSense, Adsterra, Monetag, ExoClick, Media.net, or a direct-sold sponsor snippet.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-xs text-zinc-400">
+            <p className="font-semibold uppercase tracking-[0.2em] text-zinc-200">Good default split</p>
+            <p className="mt-2 leading-6">
+              AdSense on homepage and catalog pages, then a separate direct-sold or affiliate slot on the verification flow if you want different branding there.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-[1.15rem] border border-white/8 bg-black/20 p-4">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">1. Create the unit</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-300">
+              Sign in to the provider dashboard, add your site, wait for approval, then create a banner, in-feed, or sidebar unit.
+            </p>
+          </div>
+          <div className="rounded-[1.15rem] border border-white/8 bg-black/20 p-4">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">2. Copy the snippet</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-300">
+              Paste the provider's script or iframe code into the slot snippet field. The admin panel validates that the host is allowed.
+            </p>
+          </div>
+          <div className="rounded-[1.15rem] border border-white/8 bg-black/20 p-4">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">3. Enable carefully</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-300">
+              Turn on one slot at a time, check rendering on mobile and desktop, then add more inventory only after the fill and CTR look stable.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Slots enabled" value={summary.enabled} />
         <MetricCard label="High-risk slots" value={summary.highRisk} />
