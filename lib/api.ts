@@ -114,7 +114,7 @@ export async function getFeaturedMovies() {
 }
 
 export async function getMovies(
-  page = 1, 
+  page = 1,
   pageSize = 12,
   filters?: {
     genre?: string;
@@ -127,32 +127,44 @@ export async function getMovies(
     query?: string;
   }
 ) {
-  const skip = (page - 1) * pageSize;
-  const params = new URLSearchParams({
-    skip: skip.toString(),
-    take: pageSize.toString()
-  });
-  if (filters?.genre) params.append("genre", filters.genre);
-  if (filters?.year) params.append("year", filters.year);
-  if (filters?.language) params.append("language", filters.language);
-  if (filters?.type) params.append("type", filters.type);
-  if (filters?.audio) params.append("audio", filters.audio);
-  if (filters?.quality) params.append("quality", filters.quality);
-  if (filters?.sort) params.append("sort", filters.sort);
-  if (filters?.query) params.append("q", filters.query);
-  
-  const url = `${getBaseUrl()}/api/movies?${params.toString()}`;
-  const response = await fetch(url, { cache: "no-store" });
+  try {
+    const skip = (page - 1) * pageSize;
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      take: pageSize.toString()
+    });
+    if (filters?.genre) params.append("genre", filters.genre);
+    if (filters?.year) params.append("year", filters.year);
+    if (filters?.language) params.append("language", filters.language);
+    if (filters?.type) params.append("type", filters.type);
+    if (filters?.audio) params.append("audio", filters.audio);
+    if (filters?.quality) params.append("quality", filters.quality);
+    if (filters?.sort) params.append("sort", filters.sort);
+    if (filters?.query) params.append("q", filters.query);
 
-  if (!response.ok) throw new Error("Failed to load movies.");
+    const url = `${getBaseUrl()}/api/movies?${params.toString()}`;
+    const response = await fetch(url, { cache: "no-store" });
 
-  const data = await response.json() as { movies: Movie[]; total?: number };
+    if (!response.ok) {
+      return {
+        movies: [],
+        total: 0
+      };
+    }
 
-  // total may not exist yet on old API â€” fall back to movies.length
-  return {
-    movies: data.movies,
-    total: data.total ?? data.movies.length
-  };
+    const data = (await response.json()) as { movies: Movie[]; total?: number };
+
+    // total may not exist yet on old API - fall back to movies.length
+    return {
+      movies: data.movies,
+      total: data.total ?? data.movies.length
+    };
+  } catch {
+    return {
+      movies: [],
+      total: 0
+    };
+  }
 }
 
 export async function getMovieFacetStats() {
@@ -169,12 +181,16 @@ export async function getMovieFacetStats() {
   }
 }
 
-/** Fetch all movies without pagination â€” used for carousel etc. */
+/** Fetch all movies without pagination - used for carousel etc. */
 export async function getAllMovies() {
-  const response = await fetch(`${getBaseUrl()}/api/movies`, { cache: "no-store" });
-  if (!response.ok) throw new Error("Failed to load movies.");
-  const data = await response.json() as { movies: Movie[] };
-  return data.movies;
+  try {
+    const response = await fetch(`${getBaseUrl()}/api/movies`, { cache: "no-store" });
+    if (!response.ok) return [];
+    const data = (await response.json()) as { movies: Movie[] };
+    return data.movies;
+  } catch {
+    return [];
+  }
 }
 
 export async function getMovie(slug: string) {
