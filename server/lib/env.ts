@@ -12,6 +12,7 @@ const envSchema = z.object({
   CLERK_SIGN_IN_URL: z.string().default("/sign-in"),
   CLERK_SIGN_UP_URL: z.string().default("/sign-up"),
   CLERK_ADMIN_USER_IDS: z.string().default(""),
+  MOVIESMOD_HOST_PATTERN: z.string().default(""),
   AD_ALLOWED_HOSTS: z.string().default(""),
   UPLOADS_DIR: z.string().default("public/uploads"),
   UPLOADS_PUBLIC_URL: z.string().default("/uploads"),

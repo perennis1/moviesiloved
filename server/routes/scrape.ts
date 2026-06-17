@@ -2,7 +2,8 @@ import { Router } from "express";
 import * as cheerio from "cheerio";
 import { formatReleasePackageTitle, isSizeLabel } from "../../lib/release-packages";
 import { resolveEditorActor } from "../lib/auth";
-import { getAllowedMoviesModHosts, isAllowedMoviesModHost, parseMoviesModUrl } from "../../lib/moviesmod-scrape";
+import { describeMoviesModHostCheck, getMoviesModHostPattern, parseMoviesModUrl } from "../../lib/moviesmod-scrape";
+import { env } from "../lib/env";
 
 const router = Router();
 
@@ -118,9 +119,11 @@ router.post("/", async (req, res) => {
   // Only allow explicitly approved MoviesMod domains
   try {
     const parsed = parseMoviesModUrl(url);
-    if (!isAllowedMoviesModHost(parsed.hostname)) {
+    const hostCheck = describeMoviesModHostCheck(parsed.hostname, env.MOVIESMOD_HOST_PATTERN);
+
+    if (!hostCheck.isAllowed) {
       res.status(400).json({
-        error: `URL must be from one of these MoviesMod hosts: ${getAllowedMoviesModHosts().join(", ")}.`
+        error: `URL must match the MoviesMod host pattern ${getMoviesModHostPattern(env.MOVIESMOD_HOST_PATTERN)}.`
       });
       return;
     }
@@ -333,6 +336,7 @@ router.post("/", async (req, res) => {
     ogImage,
     ogDesc,
     sourceHost: new URL(url).hostname || "moviesmod",
+    sourceHostPattern: getMoviesModHostPattern(env.MOVIESMOD_HOST_PATTERN),
     releasePackages,
     watchLinks,
     contentTypeGuess,

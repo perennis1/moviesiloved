@@ -8,6 +8,7 @@ import { buildMonetizationReport } from "@/server/lib/monetization-report";
 import { buildMediaReport } from "@/lib/media-report";
 import { prisma } from "@/server/lib/prisma";
 import { resolveUserByMinimumRole } from "@/server/lib/auth";
+import { env } from "@/server/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -217,6 +218,7 @@ export default async function AdminPage() {
     <AdminDashboard
       adminUserId={userId}
       adminRole={dashboardUser.role}
+      moviesmodHostPattern={env.MOVIESMOD_HOST_PATTERN}
       movieCount={movies.length}
       analyticsReport={analyticsReport}
       monetizationReport={monetizationReport}

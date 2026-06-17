@@ -119,6 +119,7 @@ type AdminAuditLog = {
 type AdminDashboardProps = {
   adminUserId: string;
   adminRole: AdminRole;
+  moviesmodHostPattern: string;
   movieCount: number;
   analyticsReport: AnalyticsReport | null;
   monetizationReport: MonetizationReport | null;
@@ -130,7 +131,7 @@ type AdminDashboardProps = {
   actors: AdminActorRecord[];
 };
 
-export function AdminDashboard({ adminUserId, adminRole, analyticsReport, monetizationReport, mediaReport, movieCount, recentAuditLogs, recentReviews, users, movies, actors }: AdminDashboardProps) {
+export function AdminDashboard({ adminUserId, adminRole, moviesmodHostPattern, analyticsReport, monetizationReport, mediaReport, movieCount, recentAuditLogs, recentReviews, users, movies, actors }: AdminDashboardProps) {
   const router = useRouter();
   const accessibleModules = useMemo(() => getAccessibleAdminModules(adminRole), [adminRole]);
   const [activeModule, setActiveModule] = useState<AdminModuleId>(adminRole === "ADMIN" ? "overview" : "content");
@@ -318,11 +319,12 @@ export function AdminDashboard({ adminUserId, adminRole, analyticsReport, moneti
                   />
                 ) : null}
                 {activeModule === "content" ? (
-                  <ContentModule
-                    editingMovieId={editingMovieId}
-                    movies={movies}
-                    onEditMovie={setEditingMovieId}
-                  />
+          <ContentModule
+            editingMovieId={editingMovieId}
+            moviesmodHostPattern={moviesmodHostPattern}
+            movies={movies}
+            onEditMovie={setEditingMovieId}
+          />
                 ) : null}
                 {activeModule === "people" ? (
                   <PeopleModule
@@ -433,10 +435,12 @@ function OverviewModule({
 
 function ContentModule({
   editingMovieId,
+  moviesmodHostPattern,
   movies,
   onEditMovie
 }: {
   editingMovieId: string | null;
+  moviesmodHostPattern: string;
   movies: AdminMovie[];
   onEditMovie: (movieId: string | null) => void;
 }) {
@@ -456,6 +460,7 @@ function ContentModule({
         <Panel title={editingMovieId ? "Edit Content" : "New content form"}>
           <AdminMovieForm 
             movieId={editingMovieId} 
+            moviesmodHostPattern={moviesmodHostPattern}
             onCancelEdit={editingMovieId ? () => onEditMovie(null) : undefined} 
           />
         </Panel>

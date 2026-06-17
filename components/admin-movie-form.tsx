@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { formatReleasePackageTitle, normalizeReleasePackages, type ReleaseDestinationType, type ReleasePackageForm } from "@/lib/release-packages";
 import { expandSeasonLabels, formatSeasonTrailerTitle } from "@/lib/season-trailers";
 import { MediaUploadButton } from "@/components/media-upload-button";
-import { getAllowedMoviesModHosts, parseMoviesModUrl } from "@/lib/moviesmod-scrape";
+import { describeMoviesModHostCheck, getMoviesModHostPattern, parseMoviesModUrl } from "@/lib/moviesmod-scrape";
 
 type CastInput = {
   name: string;
@@ -165,7 +165,15 @@ function mergeImportedPackages(existing: ReleasePackageForm[], incoming: Release
   return Array.from(merged.values()).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | null; onCancelEdit?: () => void }) {
+export function AdminMovieForm({
+  movieId,
+  moviesmodHostPattern,
+  onCancelEdit
+}: {
+  movieId?: string | null;
+  moviesmodHostPattern: string;
+  onCancelEdit?: () => void;
+}) {
   const [form, setForm] = useState(initialState);
   const [status, setStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,10 +203,12 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
 
     try {
       const parsed = parseMoviesModUrl(trimmed);
+      const hostCheck = describeMoviesModHostCheck(parsed.hostname, moviesmodHostPattern);
       return {
         value: trimmed,
         hostname: parsed.hostname,
-        isAllowed: parsed.isAllowed,
+        pattern: hostCheck.pattern,
+        isAllowed: hostCheck.isAllowed,
         isValid: true
       };
     } catch {
@@ -209,7 +219,7 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
         isValid: false
       };
     }
-  }, [scrapeUrl]);
+  }, [moviesmodHostPattern, scrapeUrl]);
 
   useEffect(() => {
     setStatus(null);
@@ -725,23 +735,21 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
           </button>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-zinc-500">Allowed MoviesMod hosts:</span>
-          {getAllowedMoviesModHosts().map((host) => (
-            <span key={host} className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-zinc-300">
-              {host}
-            </span>
-          ))}
+          <span className="text-zinc-500">Allowed pattern:</span>
+          <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-zinc-300">
+            {getMoviesModHostPattern(moviesmodHostPattern)}
+          </span>
         </div>
         {scrapeUrl.trim() ? (
           <div className="mt-2 text-[11px]">
             {scrapeUrlInfo.isValid ? (
               scrapeUrlInfo.isAllowed ? (
                 <p className="text-emerald-400">
-                  Host check passed: <span className="text-zinc-300">{scrapeUrlInfo.hostname}</span>
+                  Host check passed: <span className="text-zinc-300">{scrapeUrlInfo.hostname}</span> matches <span className="text-zinc-300">{scrapeUrlInfo.pattern}</span>
                 </p>
               ) : (
                 <p className="text-red-400">
-                  Host check failed for <span className="text-zinc-300">{scrapeUrlInfo.hostname || "this URL"}</span>. Use one of the approved MoviesMod hosts.
+                  Host check failed for <span className="text-zinc-300">{scrapeUrlInfo.hostname || "this URL"}</span>. It must match <span className="text-zinc-300">{scrapeUrlInfo.pattern}</span>.
                 </p>
               )
             ) : (
