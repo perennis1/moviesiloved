@@ -1427,7 +1427,8 @@ export function AdminMovieForm({
                             type="number"
                             min="0"
                             max="1"
-                            step="0.1"
+                            step="0.01"
+                            inputMode="decimal"
                             value={actor.sourceConfidence}
                             onChange={(e) => {
                               const newCast = [...form.cast];
