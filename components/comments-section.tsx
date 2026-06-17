@@ -13,11 +13,16 @@ type Comment = {
   user: { id: string; email: string };
 };
 
-export function CommentsSection({ comments, targetId }: { comments: Comment[]; targetId?: string }) {
-  const clerkReady =
-    typeof process !== "undefined" &&
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith("pk_") &&
-    !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("replace_me");
+export function CommentsSection({
+  comments,
+  targetId,
+  clerkConfigured
+}: {
+  comments: Comment[];
+  targetId?: string;
+  clerkConfigured: boolean;
+}) {
+  const clerkReady = clerkConfigured;
 
   if (!clerkReady) {
     return <CommentsSectionShell comments={comments} targetId={targetId} authMode="disabled" />;

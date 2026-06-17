@@ -6,6 +6,7 @@ import { getMovie, getMovieFacetStats, getMovies } from "@/lib/api";
 import { normalizeReleasePackages } from "@/lib/release-packages";
 import { absolutePublicUrl, compactText, truncateText } from "@/lib/public-url";
 import { formatSeasonTrailerTitle } from "@/lib/season-trailers";
+import { isClerkConfigured } from "@/lib/clerk-config";
 import { getMonetizationConfig, getMonetizationSlot } from "@/server/lib/monetization";
 import { CommentsSection } from "@/components/comments-section";
 import { ViewTracker } from "@/components/view-tracker";
@@ -120,6 +121,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function MoviePage({ params }: { params: { slug: string } }) {
+  const clerkConfigured = isClerkConfigured();
+
   try {
     const [{ movie }, monetizationConfig] = await Promise.all([
       getMovie(params.slug),
@@ -648,7 +651,7 @@ export default async function MoviePage({ params }: { params: { slug: string } }
 
               {/* Comments Section */}
               <div className="mt-8 rounded-[1.2rem] border border-[#222222] bg-[#161616] p-5 lg:p-6 shadow-lg">
-                <CommentsSection comments={movie.reviews} targetId={movie.id} />
+                <CommentsSection comments={movie.reviews} targetId={movie.id} clerkConfigured={clerkConfigured} />
               </div>
 
               {/* Discovery Rail */}
