@@ -8,6 +8,8 @@ import { absolutePublicUrl } from "@/lib/public-url";
 import { isSponsorCampaignLive } from "@/lib/site-settings";
 import { getSiteSettings } from "@/server/lib/site-settings";
 import { isClerkConfigured } from "@/lib/clerk-config";
+import { auth } from "@clerk/nextjs/server";
+import { isAllowlistedAdminUserId } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +43,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const [siteSettings, facetStats] = await Promise.all([getSiteSettings(), getMovieFacetStats()]);
   const clerkConfigured = isClerkConfigured();
+  const { userId } = clerkConfigured ? await auth() : { userId: null };
+  const isAdmin = isAllowlistedAdminUserId(userId);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0a0a0a]">
@@ -48,7 +52,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[20rem] bg-[radial-gradient(ellipse_60%_30%_at_80%_0%,_rgba(238,63,91,0.04),_transparent)]" />
 
       <Suspense fallback={null}>
-        <SiteHeader logoUrl={siteSettings.logoUrl} facetStats={facetStats} clerkConfigured={clerkConfigured} />
+        <SiteHeader logoUrl={siteSettings.logoUrl} facetStats={facetStats} clerkConfigured={clerkConfigured} isAdmin={isAdmin} />
       </Suspense>
 
       <div className="relative pt-[clamp(164px,16vw,220px)]">

@@ -2,38 +2,10 @@ import { Router } from "express";
 import * as cheerio from "cheerio";
 import { formatReleasePackageTitle, isSizeLabel } from "../../lib/release-packages";
 import { resolveEditorActor } from "../lib/auth";
+import { describeMoviesModHostCheck, getMoviesModHostPattern, parseMoviesModUrl } from "../../lib/moviesmod-scrape";
+import { env } from "../lib/env";
 
 const router = Router();
-const allowedScrapeHosts = new Set([
-  "moviesmod.band",
-  "moviesmod.bond",
-  "moviesmod.cafe",
-  "moviesmod.chat",
-  "moviesmod.day",
-  "moviesmod.email",
-  "moviesmod.food",
-  "moviesmod.fyi",
-  "moviesmod.hair",
-  "moviesmod.ink",
-  "moviesmod.lat",
-  "moviesmod.life",
-  "moviesmod.money",
-  "moviesmod.zip",
-  "www.moviesmod.band",
-  "www.moviesmod.bond",
-  "www.moviesmod.cafe",
-  "www.moviesmod.chat",
-  "www.moviesmod.day",
-  "www.moviesmod.email",
-  "www.moviesmod.food",
-  "www.moviesmod.fyi",
-  "www.moviesmod.hair",
-  "www.moviesmod.ink",
-  "www.moviesmod.lat",
-  "www.moviesmod.life",
-  "www.moviesmod.money",
-  "www.moviesmod.zip",
-]);
 
 /**
  * Cleans a raw MoviesMod title into a usable movie/series name.
@@ -145,11 +117,14 @@ router.post("/", async (req, res) => {
   }
 
   // Only allow explicitly approved MoviesMod domains
-  let parsedUrl: URL | null = null;
   try {
-    parsedUrl = new URL(url);
-    if (!allowedScrapeHosts.has(parsedUrl.hostname.toLowerCase())) {
-      res.status(400).json({ error: "URL must be from a moviesmod domain." });
+    const parsed = parseMoviesModUrl(url);
+    const hostCheck = describeMoviesModHostCheck(parsed.hostname, env.MOVIESMOD_HOST_PATTERN);
+
+    if (!hostCheck.isAllowed) {
+      res.status(400).json({
+        error: `URL must match the MoviesMod host pattern ${getMoviesModHostPattern(env.MOVIESMOD_HOST_PATTERN)}.`
+      });
       return;
     }
   } catch {
@@ -360,7 +335,8 @@ router.post("/", async (req, res) => {
     releaseYear,
     ogImage,
     ogDesc,
-    sourceHost: parsedUrl?.hostname || "moviesmod",
+    sourceHost: new URL(url).hostname || "moviesmod",
+    sourceHostPattern: getMoviesModHostPattern(env.MOVIESMOD_HOST_PATTERN),
     releasePackages,
     watchLinks,
     contentTypeGuess,

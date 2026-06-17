@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formatReleasePackageTitle, normalizeReleasePackages, type ReleaseDestinationType, type ReleasePackageForm } from "@/lib/release-packages";
 import { expandSeasonLabels, formatSeasonTrailerTitle } from "@/lib/season-trailers";
 import { MediaUploadButton } from "@/components/media-upload-button";
+import { describeMoviesModHostCheck, getMoviesModHostPattern, parseMoviesModUrl } from "@/lib/moviesmod-scrape";
 
 type CastInput = {
   name: string;
@@ -164,7 +165,15 @@ function mergeImportedPackages(existing: ReleasePackageForm[], incoming: Release
   return Array.from(merged.values()).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | null; onCancelEdit?: () => void }) {
+export function AdminMovieForm({
+  movieId,
+  moviesmodHostPattern,
+  onCancelEdit
+}: {
+  movieId?: string | null;
+  moviesmodHostPattern: string;
+  onCancelEdit?: () => void;
+}) {
   const [form, setForm] = useState(initialState);
   const [status, setStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -180,6 +189,37 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
   const [scrapeStatus, setScrapeStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [scrapePreview, setScrapePreview] = useState<MoviesModImportPreview | null>(null);
   const [importMode, setImportMode] = useState<"append" | "replace">("replace");
+  const scrapeUrlInfo = useMemo(() => {
+    const trimmed = scrapeUrl.trim();
+
+    if (!trimmed) {
+      return {
+        value: trimmed,
+        hostname: null as string | null,
+        isAllowed: false,
+        isValid: false
+      };
+    }
+
+    try {
+      const parsed = parseMoviesModUrl(trimmed);
+      const hostCheck = describeMoviesModHostCheck(parsed.hostname, moviesmodHostPattern);
+      return {
+        value: trimmed,
+        hostname: parsed.hostname,
+        pattern: hostCheck.pattern,
+        isAllowed: hostCheck.isAllowed,
+        isValid: true
+      };
+    } catch {
+      return {
+        value: trimmed,
+        hostname: null as string | null,
+        isAllowed: false,
+        isValid: false
+      };
+    }
+  }, [moviesmodHostPattern, scrapeUrl]);
 
   useEffect(() => {
     setStatus(null);
@@ -575,7 +615,7 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
   }
 
   async function handleScrape() {
-    if (!scrapeUrl.trim()) return;
+    if (!scrapeUrlInfo.isValid || !scrapeUrlInfo.isAllowed) return;
     setIsScraping(true);
     setScrapeStatus(null);
     setScrapePreview(null);
@@ -687,13 +727,36 @@ export function AdminMovieForm({ movieId, onCancelEdit }: { movieId?: string | n
           />
           <button
             type="button"
-            disabled={isScraping || !scrapeUrl.trim()}
+            disabled={isScraping || !scrapeUrlInfo.isAllowed}
             onClick={handleScrape}
             className="shrink-0 rounded-lg bg-sky-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isScraping ? "Extracting..." : "Extract Data"}
           </button>
         </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="text-zinc-500">Allowed pattern:</span>
+          <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-zinc-300">
+            {getMoviesModHostPattern(moviesmodHostPattern)}
+          </span>
+        </div>
+        {scrapeUrl.trim() ? (
+          <div className="mt-2 text-[11px]">
+            {scrapeUrlInfo.isValid ? (
+              scrapeUrlInfo.isAllowed ? (
+                <p className="text-emerald-400">
+                  Host check passed: <span className="text-zinc-300">{scrapeUrlInfo.hostname}</span> matches <span className="text-zinc-300">{scrapeUrlInfo.pattern}</span>
+                </p>
+              ) : (
+                <p className="text-red-400">
+                  Host check failed for <span className="text-zinc-300">{scrapeUrlInfo.hostname || "this URL"}</span>. It must match <span className="text-zinc-300">{scrapeUrlInfo.pattern}</span>.
+                </p>
+              )
+            ) : (
+              <p className="text-red-400">Enter a valid https URL before extracting.</p>
+            )}
+          </div>
+        ) : null}
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"

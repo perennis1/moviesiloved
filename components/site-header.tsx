@@ -38,11 +38,13 @@ function buildCountMap(items: HomepageFacetStats["genres"]) {
 export function SiteHeader({
   logoUrl,
   facetStats,
-  clerkConfigured
+  clerkConfigured,
+  isAdmin
 }: {
   logoUrl?: string | null;
   facetStats: HomepageFacetStats;
   clerkConfigured: boolean;
+  isAdmin: boolean;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -191,7 +193,16 @@ export function SiteHeader({
           </div>
 
           <div className="flex items-center gap-3">
-            {clerkConfigured ? <ClerkActions profileMenuRef={profileMenuRef} isProfileMenuOpen={isProfileMenuOpen} setIsProfileMenuOpen={setIsProfileMenuOpen} /> : <AuthOffBadge />}
+            {clerkConfigured ? (
+              <ClerkActions
+                isAdmin={isAdmin}
+                profileMenuRef={profileMenuRef}
+                isProfileMenuOpen={isProfileMenuOpen}
+                setIsProfileMenuOpen={setIsProfileMenuOpen}
+              />
+            ) : (
+              <AuthOffBadge />
+            )}
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -312,15 +323,17 @@ export function SiteHeader({
 }
 
 function ClerkActions({
+  isAdmin,
   profileMenuRef,
   isProfileMenuOpen,
   setIsProfileMenuOpen
 }: {
+  isAdmin: boolean;
   profileMenuRef: RefObject<HTMLDivElement>;
   isProfileMenuOpen: boolean;
   setIsProfileMenuOpen: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { user } = useClerk();
+  const { signOut, user } = useClerk();
 
   return (
     <>
@@ -332,9 +345,11 @@ function ClerkActions({
         </SignInButton>
       </SignedOut>
       <SignedIn>
-        <Link href={adminHref} className="inline-flex rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
-          Admin
-        </Link>
+        {isAdmin ? (
+          <Link href={adminHref} className="inline-flex rounded-xl border border-white/5 bg-[#161616]/70 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-zinc-300 transition hover:bg-white/5 hover:text-white">
+            Admin
+          </Link>
+        ) : null}
         <div ref={profileMenuRef} className="relative">
           <button
             type="button"
@@ -371,6 +386,25 @@ function ClerkActions({
                 >
                   Account
                 </Link>
+                {isAdmin ? (
+                  <Link
+                    href={adminHref}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                    className="flex items-center rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                  >
+                    Admin dashboard
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    void signOut({ redirectUrl: "/" });
+                  }}
+                  className="flex w-full items-center rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  Sign out
+                </button>
               </div>
             </>
           ) : null}
